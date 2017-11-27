@@ -1,13 +1,4 @@
 
-spring:
-    mail:
-        host: smtp.gmail.com
-        port: 587
-        username: davidnezan@gmail.com
-        password: 3david35        
-        smtp.auth: true
-        smtp.starttls.enable: true
-        
 hibernate:
     showSql: true
     dialect: org.hibernate.dialect.Oracle10gDialect
