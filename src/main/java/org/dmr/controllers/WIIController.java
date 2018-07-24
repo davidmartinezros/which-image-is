@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Created by davidmartinezros on 31/08/2017.
@@ -27,18 +30,32 @@ public class WIIController {
 	
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     
+    // La url a crida es http://localhost:8080/wii/view/form
+    
     public WIIController() {
         
     }
     
-    @RequestMapping(value = "/wii/askForImage", method = RequestMethod.POST)
-    public String askForImage(@RequestParam("image") byte[] image) throws Exception {
+    @RequestMapping(value="/askForImage", method=RequestMethod.POST)
+    public @ResponseBody String handleFileUpload(@RequestParam("file") MultipartFile file) {
     	
-    	return wiiService.askForImage(image);
+        if (!file.isEmpty()) {
+            try {
+                byte[] bytes = file.getBytes();
+                
+                log.debug(bytes.toString());
+                
+                return wiiService.askForImage(bytes);
+            } catch (Exception e) {
+                return "You failed to upload => " + e.getMessage();
+            }
+        } else {
+            return "You failed to upload because the file was empty.";
+        }
         
     }
     
-    @RequestMapping(value = "/howdyl/state", method = RequestMethod.GET)
+    @RequestMapping(value = "/state", method = RequestMethod.GET)
     public String getState() throws Exception {
     	
     	return "OK";

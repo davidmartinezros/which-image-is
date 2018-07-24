@@ -1,13 +1,16 @@
-
-spring:
-    mail:
-        host: smtp.gmail.com
-        port: 587
-        username: davidnezan@gmail.com
-        password: 3david35        
-        smtp.auth: true
-        smtp.starttls.enable: true
-        
+      
+server:
+  port: 8080
+  contextPath: /wii
+  
 hibernate:
     showSql: true
     dialect: org.hibernate.dialect.Oracle10gDialect
+    
+spring:
+    thymeleaf.cache: false
+    thymeleaf.check-template: true
+    thymeleaf.check-template-location: true
+    thymeleaf.content-type: text/html
+    thymeleaf.enabled: true
+    thymeleaf.encoding: UTF-8
