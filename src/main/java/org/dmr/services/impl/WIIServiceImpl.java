@@ -33,11 +33,11 @@ public class WIIServiceImpl implements WIIService {
     @Override
     public String askForImage(byte[] imageBytes) {
 	
-	    String modelDir = "C:\\RepositoriWII";
+	    String modelDir = "/which-monument";
 
-	    byte[] graphDef = readAllBytesOrExit(Paths.get(modelDir, "animals.pb"));
+	    byte[] graphDef = readAllBytesOrExit(Paths.get(modelDir, "tensorflow_inception_graph.pb"));
 	    List<String> labels =
-	        readAllLinesOrExit(Paths.get(modelDir, "animals_labels.txt"));
+	        readAllLinesOrExit(Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"));
 
 	    try (Tensor image = constructAndExecuteGraphToNormalizeImage(imageBytes)) {
 	      float[] labelProbabilities = executeInceptionGraph(graphDef, image);
