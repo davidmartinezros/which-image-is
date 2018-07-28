@@ -5,9 +5,11 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.dmr.model.Intent;
 import org.dmr.services.WIIService;
 import org.springframework.stereotype.Service;
 import org.tensorflow.DataType;
@@ -25,19 +27,21 @@ import org.tensorflow.Tensor;
  */
 @Service
 public class WIIServiceImpl implements WIIService {
-
+	
+	//private String modelDir = "C:/RepositoriWII";
+    private String modelDir = "/which-monument";
+	
+	private byte[] graphDef;
+	
+	private List<String> labels;
+    
     public WIIServiceImpl() {
-        
+    	graphDef = readAllBytesOrExit(Paths.get(modelDir, "tensorflow_inception_graph.pb"));
+	    labels = readAllLinesOrExit(Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"));
     }
     
     @Override
-    public String askForImage(byte[] imageBytes) {
-	
-	    String modelDir = "/which-monument";
-
-	    byte[] graphDef = readAllBytesOrExit(Paths.get(modelDir, "tensorflow_inception_graph.pb"));
-	    List<String> labels =
-	        readAllLinesOrExit(Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"));
+    public String askForImageOneLabel(byte[] imageBytes) {	    
 
 	    try (Tensor image = constructAndExecuteGraphToNormalizeImage(imageBytes)) {
 	      float[] labelProbabilities = executeInceptionGraph(graphDef, image);
@@ -47,6 +51,29 @@ public class WIIServiceImpl implements WIIService {
 	              "BEST MATCH: %s (%.2f%% likely)",
 	              labels.get(bestLabelIdx), labelProbabilities[bestLabelIdx] * 100f));
 	      return labels.get(bestLabelIdx);
+	    }
+    	
+    }
+    
+    @Override
+    public List<Intent> askForImageAllLabels(byte[] imageBytes) {
+	    
+	    List<Intent> result = new ArrayList<Intent>();
+	    
+	    try (Tensor image = constructAndExecuteGraphToNormalizeImage(imageBytes)) {
+	      float[] labelProbabilities = executeInceptionGraph(graphDef, image);
+	      List<Integer> bestsLabelIdx = indexGranterThan20Percent(labelProbabilities);
+	      for(Integer pos: bestsLabelIdx) {
+	    	  String text = String.format(
+    	              "%s (%.2f%% likely)",
+    	              labels.get(pos), labelProbabilities[pos] * 100f);
+	    	  System.out.println(text);
+	    	  Intent intent = new Intent();
+	    	  intent.setLabel(labels.get(pos));
+	    	  intent.setProbability(labelProbabilities[pos] * 100f);
+	    	  result.add(intent);
+	      }	      
+	      return result;
 	    }
     	
     }
@@ -112,6 +139,16 @@ public class WIIServiceImpl implements WIIService {
         }
         return best;
       }
+      
+      private static List<Integer> indexGranterThan20Percent(float[] probabilities) {
+          List<Integer> bests = new ArrayList<Integer>();
+          for (int i = 1; i < probabilities.length; ++i) {
+            if (probabilities[i] > 0.20) {
+              bests.add(i);
+            }
+          }
+          return bests;
+        }
 
       private static byte[] readAllBytesOrExit(Path path) {
         try {

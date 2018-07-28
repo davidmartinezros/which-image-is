@@ -1,5 +1,8 @@
 package org.dmr.controllers;
 
+import java.util.List;
+
+import org.dmr.model.Intent;
 import org.dmr.services.WIIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Created by davidmartinezros on 31/08/2017.
@@ -36,8 +38,8 @@ public class WIIController {
         
     }
     
-    @RequestMapping(value="/askForImage", method=RequestMethod.POST)
-    public @ResponseBody String handleFileUpload(@RequestParam("file") MultipartFile file) {
+    @RequestMapping(value="/askForImageOneLabel", method=RequestMethod.POST)
+    public @ResponseBody String askForImageOneLabel(@RequestParam("file") MultipartFile file) throws Exception {
     	
         if (!file.isEmpty()) {
             try {
@@ -45,12 +47,31 @@ public class WIIController {
                 
                 log.debug(bytes.toString());
                 
-                return wiiService.askForImage(bytes);
+                return wiiService.askForImageOneLabel(bytes);
             } catch (Exception e) {
-                return "You failed to upload => " + e.getMessage();
+            	throw e;
             }
         } else {
-            return "You failed to upload because the file was empty.";
+        	throw new Exception("You failed to upload because the file was empty.");
+        }
+        
+    }
+    
+    @RequestMapping(value="/askForImageAllLabels", method=RequestMethod.POST)
+    public @ResponseBody List<Intent> askForImageAllLabels(@RequestParam("file") MultipartFile file) throws Exception {
+    	
+        if (!file.isEmpty()) {
+            try {
+                byte[] bytes = file.getBytes();
+                
+                log.debug(bytes.toString());
+                
+                return wiiService.askForImageAllLabels(bytes);
+            } catch (Exception e) {
+                throw e;
+            }
+        } else {
+            throw new Exception("You failed to upload because the file was empty.");
         }
         
     }
