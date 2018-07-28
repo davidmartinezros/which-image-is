@@ -28,24 +28,21 @@ import org.tensorflow.Tensor;
 @Service
 public class WIIServiceImpl implements WIIService {
 	
-	private String modelDir;
+	//private String modelDir = "C:/RepositoriWII";
+    private String modelDir = "/which-monument";
 	
 	private byte[] graphDef;
 	
 	private List<String> labels;
     
     public WIIServiceImpl() {
-    	
+    	graphDef = readAllBytesOrExit(Paths.get(modelDir, "tensorflow_inception_graph.pb"));
+	    labels = readAllLinesOrExit(Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"));
     }
     
     @Override
     public String askForImageOneLabel(byte[] imageBytes) {	    
-    	
-    	//modelDir = "C:/RepositoriWII";
-    	modelDir = "/which-monument";
-    	graphDef = readAllBytesOrExit(Paths.get(modelDir, "tensorflow_inception_graph.pb"));
-	    labels = readAllLinesOrExit(Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"));
-    	
+
 	    try (Tensor image = constructAndExecuteGraphToNormalizeImage(imageBytes)) {
 	      float[] labelProbabilities = executeInceptionGraph(graphDef, image);
 	      int bestLabelIdx = maxIndex(labelProbabilities);
@@ -60,11 +57,6 @@ public class WIIServiceImpl implements WIIService {
     
     @Override
     public List<Intent> askForImageAllLabels(byte[] imageBytes) {
-	    
-    	//modelDir = "C:/RepositoriWII";
-    	modelDir = "/which-monument";
-    	graphDef = readAllBytesOrExit(Paths.get(modelDir, "tensorflow_inception_graph.pb"));
-	    labels = readAllLinesOrExit(Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"));
 	    
 	    List<Intent> result = new ArrayList<Intent>();
 	    
