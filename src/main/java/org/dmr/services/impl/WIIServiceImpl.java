@@ -28,8 +28,7 @@ import org.tensorflow.Tensor;
 @Service
 public class WIIServiceImpl implements WIIService {
 	
-	//private String modelDir = "C:/RepositoriWII";
-    private String modelDir = "/which-monument";
+	private String modelDir = "C:/RepositoriWII";
 	
 	private byte[] graphDef;
 	
@@ -42,7 +41,9 @@ public class WIIServiceImpl implements WIIService {
     
     @Override
     public String askForImageOneLabel(byte[] imageBytes) {	    
-
+    	
+    	modelDir = "/which-monument";
+    	
 	    try (Tensor image = constructAndExecuteGraphToNormalizeImage(imageBytes)) {
 	      float[] labelProbabilities = executeInceptionGraph(graphDef, image);
 	      int bestLabelIdx = maxIndex(labelProbabilities);
@@ -58,6 +59,8 @@ public class WIIServiceImpl implements WIIService {
     @Override
     public List<Intent> askForImageAllLabels(byte[] imageBytes) {
 	    
+    	modelDir = "/which-monument";
+    	
 	    List<Intent> result = new ArrayList<Intent>();
 	    
 	    try (Tensor image = constructAndExecuteGraphToNormalizeImage(imageBytes)) {
